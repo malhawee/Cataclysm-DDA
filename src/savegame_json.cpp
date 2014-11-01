@@ -1339,6 +1339,11 @@ void vehicle::deserialize(JsonIn &jsin)
     if ( savegame_loading_version < 11 ) {
         add_missing_frames();
     }
+    if (savegame_loading_version < 23){
+        //add battery container part if a storage battery is present
+        add_missing_battery_case();
+    }
+
     refresh();
 
     data.read("tags", tags);
