@@ -2532,7 +2532,7 @@
         "item" : "motor_small",
         "difficulty" : 1,
         "location" : "engine_block",
-        "flags" : ["ENGINE"],
+        "flags" : ["ENGINE", "FOLDABLE"],
         "breaks_into" : [
             {"item": "steel_lump", "min": 1, "max": 2},
             {"item": "steel_chunk", "min": 1, "max": 2},
@@ -2770,7 +2770,7 @@
         "item" : "small_storage_battery",
         "difficulty" : 1,
         "location" : "fuel_source",
-        "flags" : ["FUEL_TANK", "TOOL_NONE"],
+        "flags" : ["FUEL_TANK", "TOOL_NONE", "FOLDABLE"],
         "breaks_into" : [
             {"item": "scrap", "min": 1, "max": 2}
         ]
@@ -3753,6 +3753,27 @@
             {"item": "steel_lump", "min": 8, "max": 12},
             {"item": "steel_chunk", "min": 8, "max": 12},
             {"item": "scrap", "min": 8, "max": 12}
+        ]
+    },{
+        "type" : "vehicle_part",
+        "id" : "alternator_bicycle",
+        "name" : "bicycle dynamo",
+        "symbol" : "*",
+        "color" : "yellow",
+        "broken_symbol" : "#",
+        "broken_color" : "red",
+        "damage_modifier" : 80,
+        "durability" : 100,
+        "power" : -5,
+        "epower" : 500,
+        "fuel_type" : "battery",
+        "item" : "alternator_motorbike",
+        "difficulty" : 2,
+        "flags" : ["ALTERNATOR", "REQ_MUSCLE"],
+        "breaks_into" : [
+            {"item": "steel_lump", "min": 2, "max": 5},
+            {"item": "steel_chunk", "min": 2, "max": 5},
+            {"item": "scrap", "min": 2, "max": 5}
         ]
     },{
         "type" : "vehicle_part",
