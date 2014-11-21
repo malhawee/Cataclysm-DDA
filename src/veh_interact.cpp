@@ -480,14 +480,18 @@ bool veh_interact::is_drive_conflict(int msg_width, int engines){
 
 bool veh_interact::can_install_part(int msg_width, int engines, int dif_eng){
     itype_id itm = sel_vpart_info->item;
-    bool drive_conflict = is_drive_conflict(msg_width, engines);
+    bool drive_conflict = false;
     bool is_engine = sel_vpart_info->has_flag("ENGINE");
+    if (is_engine){
+        drive_conflict = is_drive_conflict(msg_width, engines);
+    }
     bool has_comps = crafting_inv.has_components(itm, 1);
     bool has_skill = g->u.skillLevel("mechanics") >= sel_vpart_info->difficulty;
     bool has_tools = ((has_welder && has_goggles) || has_duct_tape) && has_wrench;
     bool has_skill2 = !is_engine || (g->u.skillLevel("mechanics") >= dif_eng);
     bool is_wrenchable = sel_vpart_info->has_flag("TOOL_WRENCH");
     bool is_hand_remove = sel_vpart_info->has_flag("TOOL_NONE");
+    
     std::string engine_string = "";
     if (!drive_conflict){
         if (engines && is_engine) { // already has engine

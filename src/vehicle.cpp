@@ -493,7 +493,7 @@ bool vehicle::is_part_on(int p) {
 
 bool vehicle::is_active_engine_at(int x,int y) {
     for( size_t e = 0; e < engines.size(); ++e ) {
-        if( is_engine_on(e) &&
+        if( (is_engine_on(e)) &&
             parts[engines[e]].mount_dx == x &&
             parts[engines[e]].mount_dy == y ) {
             return true;
@@ -786,11 +786,12 @@ void vehicle::use_controls()
     case toggle_engine:
         if (g->u.controlling_vehicle) {
             if (engine_on) {
-                engine_on = false;
                 add_msg(_("You turn the engine off and let go of the controls."));
             } else {
                 add_msg(_("You let go of the controls."));
             }
+            engine_on = false;
+            muscle_on = false;
             g->u.controlling_vehicle = false;
             break;
         } else if (engine_on) {
@@ -910,7 +911,8 @@ void vehicle::use_controls()
 
 void vehicle::start_engine()
 {
-    bool muscle_powered = false;
+    bool has_real_engine_start = false;
+    bool has_muscle_engine_start = false;
     // TODO: Make chance of success based on engine condition.
     for( size_t e = 0; e < engines.size(); ++e ) {
         if(parts[engines[e]].hp > 0) {
@@ -918,25 +920,27 @@ void vehicle::start_engine()
                 int engine_power = part_power(engines[e]);
                 if(engine_power < 50) {
                     // Small engines can be pull-started
-                    engine_on = true;
+                    has_real_engine_start = true;
                 } else {
                     // Starter motor battery draw proportional to engine power
                     if(!discharge_battery(engine_power / 10)) {
-                        engine_on = true;
+                        has_real_engine_start = true;
                     }
                 }
             } else if (part_info(engines[e]).fuel_type == fuel_type_muscle) {
-                muscle_powered = true;
+                has_muscle_engine_start = true;
             } else {
                 // Electric & plasma engines
-                engine_on = true;
+                has_real_engine_start = true;
             }
         }
     }
-
-    if(engine_on == true) {
+    if (has_real_engine_start || has_muscle_engine_start) {
+        engine_on = true;
+    }
+    if(has_real_engine_start) {
         add_msg(_("The %s's engine starts up."), name.c_str());
-    } else if (!muscle_powered) {
+    } else if (!has_muscle_engine_start) {
         add_msg (_("The %s's engine fails to start."), name.c_str());
     }
 }
@@ -1140,7 +1144,7 @@ bool vehicle::can_mount (int dx, int dy, std::string id)
         return false;
     }
 
-    // Alternators must be installed on a gas engine
+    // Alternators must be installed on a gas engine, or have the muscle flag
     if(vehicle_part_types[id].has_flag(VPFLAG_ALTERNATOR)) {
         bool anchor_found = false;
         for(std::vector<int>::const_iterator it = parts_in_square.begin();
@@ -1149,7 +1153,7 @@ bool vehicle::can_mount (int dx, int dy, std::string id)
                 (part_info(*it).fuel_type == fuel_type_gasoline || 
                 part_info(*it).fuel_type == fuel_type_diesel ||
                 (part_info(*it).fuel_type == fuel_type_muscle && 
-                    vehicle_part_types[id].has_flag("REQ_MUSCLE"))) {
+                    vehicle_part_types[id].has_flag("REQ_MUSCLE")))) {
                 anchor_found = true;
             }
         }
@@ -2786,12 +2790,14 @@ void vehicle::power_parts ()//TODO: more categories of powered part!
     }
 
     int battery_discharge = power_to_epower(fuel_capacity(fuel_type_battery) - fuel_left(fuel_type_battery));
-    if(engine_on) {
+    if(engine_on || muscle_powered) {
         // If the engine is on, the alternators are working.
         int alternators_epower = 0;
         int alternators_power = 0;
         for( size_t p = 0; p < alternators.size(); ++p ) {
-            if(is_alternator_on(p)) {
+            if ((engine_on || muscle_powered && part_info(p).has_flag("REQ_MUSCLE")) && 
+                is_alternator_on(p)) 
+            {
                 alternators_epower += part_info(alternators[p]).epower;
                 alternators_power += part_power(alternators[p]);
             }
