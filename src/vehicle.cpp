@@ -1146,7 +1146,10 @@ bool vehicle::can_mount (int dx, int dy, std::string id)
         for(std::vector<int>::const_iterator it = parts_in_square.begin();
             it != parts_in_square.end(); ++it ) {
             if(part_info(*it).has_flag(VPFLAG_ENGINE) &&
-               (part_info(*it).fuel_type == fuel_type_gasoline || part_info(*it).fuel_type == fuel_type_diesel)) {
+                (part_info(*it).fuel_type == fuel_type_gasoline || 
+                part_info(*it).fuel_type == fuel_type_diesel ||
+                (part_info(*it).fuel_type == fuel_type_muscle && 
+                    vehicle_part_types[id].has_flag("REQ_MUSCLE"))) {
                 anchor_found = true;
             }
         }
